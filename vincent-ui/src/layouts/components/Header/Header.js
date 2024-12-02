@@ -1,154 +1,208 @@
-import classNames from 'classnames/bind';
+import React, { useState } from 'react';
+import { Grid2 as Grid,IconButton, Drawer, List, ListItem, ListItemText, Box, Container } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faCircleQuestion,
-    faCoins,
-    faEarthAsia,
-    faEllipsisVertical,
-    faGear,
-    faKeyboard,
-    faSignOut,
-    faUser,
-    faShoppingCart,
-    faBell,
-} from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { faBars, faShoppingCart, faBell, faUser, faCircleQuestion, faEarthAsia, faEllipsisVertical, faGear, faKeyboard, faSignOut, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
-
-import config from '~/config';
 import Button from '~/components/Button';
+import Search from '../Search';
+import Menu from '~/components/Popper/Menu';
+import Image from '~/components/Image';
+import { Link } from 'react-router-dom';
+import config from '~/config';
 import styles from './Header.module.scss';
 import images from '~/assets/images';
-import Menu from '~/components/Popper/Menu';
-import { InboxIcon, MessageIcon, UploadIcon } from '~/components/Icons';
-import Image from '~/components/Image';
-import Search from '../Search';
+import classNames from 'classnames/bind';
+import { useMediaQuery } from '@mui/material'; // Import useMediaQuery
 
 const cx = classNames.bind(styles);
 
 const MENU_ITEMS = [
-    {
-        icon: <FontAwesomeIcon icon={faEarthAsia} />,
-        title: 'English',
-        children: {
-            title: 'Language',
-            data: [
-                {
-                    type: 'language',
-                    code: 'en',
-                    title: 'English',
-                },
-                {
-                    type: 'language',
-                    code: 'vi',
-                    title: 'Tiếng Việt',
-                },
-            ],
-        },
+  {
+    icon: <FontAwesomeIcon icon={faEarthAsia} />,
+    title: 'English',
+    children: {
+      title: 'Language',
+      data: [
+        { type: 'language', code: 'en', title: 'English' },
+        { type: 'language', code: 'vi', title: 'Tiếng Việt' },
+      ],
     },
-    {
-        icon: <FontAwesomeIcon icon={faCircleQuestion} />,
-        title: 'Feedback and help',
-        to: '/feedback',
-    },
-    {
-        icon: <FontAwesomeIcon icon={faKeyboard} />,
-        title: 'Keyboard shortcuts',
-    },
+  },
+  {
+    icon: <FontAwesomeIcon icon={faCircleQuestion} />,
+    title: 'Phản hồi và góp ý',
+    to: '/feedback',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faKeyboard} />,
+    title: 'Bản phím',
+  },
 ];
 
 function Header() {
-    const currentUser = true;
+  const currentUser = true;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);  // State to control search visibility
 
-    // Handle logic
-    const handleMenuChange = (menuItem) => {
-        switch (menuItem.type) {
-            case 'language':
-                // Handle change language
-                break;
-            default:
-        }
-    };
+  // Check screen size using useMediaQuery
+  const isMobile = useMediaQuery('(max-width:768px)'); // Screen size smaller than 768px
 
-    const userMenu = [
-        {
-            icon: <FontAwesomeIcon icon={faUser} />,
-            title: 'View profile',
-            to: '/@hoaa',
-        },
-        {
-            icon: <FontAwesomeIcon icon={faCoins} />,
-            title: 'Get coins',
-            to: '/coin',
-        },
-        {
-            icon: <FontAwesomeIcon icon={faGear} />,
-            title: 'Settings',
-            to: '/settings',
-        },
-        ...MENU_ITEMS,
-        {
-            icon: <FontAwesomeIcon icon={faSignOut} />,
-            title: 'Log out',
-            to: '/logout',
-            separate: true,
-        },
-    ];
+  const handleMenuChange = (menuItem) => {
+    switch (menuItem.type) {
+      case 'language':
+        // Handle language change
+        break;
+      default:
+        break;
+    }
+  };
 
-    return (
-        <header className={cx('wrapper')}>
-            <div className={cx('inner')}>
-                <Link to={config.routes.home} className={cx('logo-link')}>
-                    <img src={images.logo} alt="Vincent" />
-                </Link>
+  const userMenu = [
+    { icon: <FontAwesomeIcon icon={faUser} />, title: 'Hồ sơ của tôi', to: '/@hoaa' },
+    { icon: <FontAwesomeIcon icon={faGear} />, title: 'Cài đặt', to: '/settings' },
+    ...MENU_ITEMS,
+    { icon: <FontAwesomeIcon icon={faSignOut} />, title: 'Đăng xuất', to: '/logout', separate: true },
+  ];
 
-                <Search />
+  const toggleDrawer = (open) => {
+    setDrawerOpen(open);
+  };
 
-                <div className={cx('actions')}>
-                    {currentUser ? (
-                        <>
-                            <Tippy delay={[0, 50]} content="Khóa học của tôi" placement="bottom">
-                                <a className={cx('action-btn')}>
-                                    Khóa học của tôi
-                                </a>
-                            </Tippy>
-                            <Tippy delay={[0, 50]} content="Giỏ hàng" placement="bottom">
-                                <button className={cx('action-btn')}>
-                                    <FontAwesomeIcon icon={faShoppingCart} />
-                                </button>
-                            </Tippy>
-                            <Tippy delay={[0, 50]} content="Thông báo" placement="bottom">
-                                <button className={cx('action-btn')}>
-                                    <FontAwesomeIcon icon={faBell} />
-                                    <span className={cx('badge')}>12</span>
-                                </button>
-                            </Tippy>
-                        </>
-                    ) : (
-                        <>
-                            <Button text>Upload</Button>
-                            <Button primary>Log in</Button>
-                        </>
-                    )}
+  const toggleSearchVisibility = () => {
+    setSearchVisible(!searchVisible);
+  };
 
-                    <Menu items={currentUser ? userMenu : MENU_ITEMS} onChange={handleMenuChange}>
+  return (
+    <header className={cx('wrapper')}>
+      <div className={cx('inner')}>
+        {/* Logo */}
+        <Link to={config.routes.home} className={cx('logo-link')}>
+          <img src={images.logo} alt="Vincent" />
+        </Link>
+
+        {/* Search Bar */}
+        {isMobile ? (
+          <></>
+        ) : (
+          <div className={`${cx('search')} ${isMobile && !searchVisible ? cx('search-input-hidden') : ''}`}>
+            <Search />
+          </div>
+        )}
+
+        <div className={cx('actions')}>
+          <Grid sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* For Desktop */}
+            {!isMobile && (
+              <div className={cx('actions')}>
+                {currentUser ? (
+                  <>
+                    <Tippy delay={[0, 50]} content="Khóa học của tôi" placement="bottom">
+                      <a className={cx('action-btn')} to='/'>
+                        Khóa học của tôi
+                      </a>
+                    </Tippy>
+                    <Tippy delay={[0, 50]} content="Giỏ hàng" placement="bottom">
+                      <button className={cx('action-btn')}>
+                        <FontAwesomeIcon icon={faShoppingCart} />
+                      </button>
+                    </Tippy>
+                    <Tippy delay={[0, 50]} content="Thông báo" placement="bottom">
+                      <button className={cx('action-btn')}>
+                        <FontAwesomeIcon icon={faBell} />
+                        <span className={cx('badge')}>12</span>
+                      </button>
+                    </Tippy>
+                  </>
+                ) : (
+                  <>
+                    <Button text>Đăng ký</Button>
+                    <Button primary to="/login">
+                      Đăng nhập
+                    </Button>
+                  </>
+                )}
+                <Menu items={currentUser ? userMenu : MENU_ITEMS} onChange={handleMenuChange}>
+                  {currentUser ? (
+                    <Image className={cx('user-avatar')} src={images.avatar} alt="Nguyen Van A" />
+                  ) : (
+                    <button className={cx('more-btn')}>
+                      <FontAwesomeIcon icon={faEllipsisVertical} />
+                    </button>
+                  )}
+                </Menu>
+              </div>
+              
+            )}
+
+            {/* For Mobile */}
+            {isMobile && (
+              <Grid item>
+                <IconButton onClick={() => toggleDrawer(true)}>
+                  <FontAwesomeIcon icon={faBars} />
+                </IconButton>
+                <Drawer anchor="right" open={drawerOpen} onClose={() => toggleDrawer(false)}>
+                  <List>
+                    {/* Search input inside Drawer */}
                         {currentUser ? (
-                            <Image
-                                className={cx('user-avatar')}
-                                src="https://files.fullstack.edu.vn/f8-prod/user_avatars/1/623d4b2d95cec.png"
-                                alt="Nguyen Van A"
-                            />
-                        ) : (
-                            <button className={cx('more-btn')}>
-                                <FontAwesomeIcon icon={faEllipsisVertical} />
-                            </button>
-                        )}
-                    </Menu>
-                </div>
-            </div>
-        </header>
-    );
+                            <ListItem>
+                                <Image className={cx('user-avatar')} src={images.avatar} alt="Nguyen Van A" />
+                                <ListItemText primary="Nguyen Van A" sx={{ ml: 2 }}/>
+                            </ListItem>
+                        ):(<></>)}
+                        <ListItem>
+                            <ListItemText>
+                            <div className={cx('search-wrapper')}>
+                                {/* Show icon or input based on search visibility */}
+                                {!searchVisible && isMobile ? (
+                                <IconButton onClick={toggleSearchVisibility}>
+                                    <FontAwesomeIcon icon={faSearch} />
+                                </IconButton>
+                                ) : (
+                                <Search /> // Assuming you have the Search component here
+                                )}
+                            </div>
+                            </ListItemText>
+                        </ListItem>
+                    {currentUser ? (
+                      <div>
+                        <ListItem button component={Link} to="/login">
+                          <ListItemText primary="Khóa học của tôi" />
+                        </ListItem>
+                        <ListItem button component={Link} to="/login">
+                          <ListItemText primary="Giỏ hàng" />
+                          <FontAwesomeIcon icon={faShoppingCart} size='xs'/>
+                        </ListItem>
+                        <ListItem button component={Link} to="/login">
+                          <ListItemText primary="Thông báo" />
+                          <FontAwesomeIcon icon={faBell} size='xs'/>
+                        </ListItem>
+                    </div>
+                    ) : (
+                      <>
+                        <ListItem button component={Link} to="/login">
+                          <ListItemText primary="Đăng nhập" />
+                        </ListItem>
+                        <ListItem button component={Link} to="/signup">
+                          <ListItemText primary="Đăng ký" />
+                        </ListItem>
+                      </>
+                    )}
+                    <ListItem button component={Link} to="/feedback">
+                      <ListItemText primary="Phản hồi và góp ý" />
+                    </ListItem>
+                    <ListItem button component={Link} to="/logout">
+                      <ListItemText primary="Đăng xuất" />
+                    </ListItem>
+                  </List>
+                </Drawer>
+              </Grid>
+            )}
+          </Grid>
+        </div>
+      </div>
+    </header>
+  );
 }
 
 export default Header;

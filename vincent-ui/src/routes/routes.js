@@ -8,19 +8,19 @@ import { HeaderOnly } from '~/layouts';
 
 // Pages
 import Home from '~/pages/Home';
-import Following from '~/pages/Following';
 import Profile from '~/pages/Profile';
-import Upload from '~/pages/Upload';
+import MyCourse from '~/pages/MyCourses';
+import Watch from '~/pages/Watch';
 import Search from '~/pages/Search';
-import Live from '~/pages/Live';
+import Login from '~/pages/Login';
 
 // Public routes
 const publicRoutes = [
     { path: config.routes.home, component: Home },
-    { path: config.routes.following, component: Following },
-    { path: config.routes.live, component: Live, auth: StudentRoute },
+    { path: config.routes.login, component: Login, layout: HeaderOnly },
+    { path: config.routes.watch, component: Watch, auth: StudentRoute },
     { path: config.routes.profile, component: Profile },
-    { path: config.routes.upload, component: Upload, layout: HeaderOnly },
+    { path: config.routes.myCourse, component: MyCourse, layout: HeaderOnly },
     { path: config.routes.search, component: Search, layout: null },
 ];
 

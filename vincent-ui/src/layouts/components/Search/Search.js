@@ -18,10 +18,12 @@ function Search() {
     const [searchResult, setSearchResult] = useState([]);
     const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null); // State to handle error
 
     const debouncedValue = useDebounce(searchValue, 500);
 
     const inputRef = useRef();
+    const abortControllerRef = useRef(new AbortController()); // For aborting requests
 
     useEffect(() => {
         if (!debouncedValue.trim()) {
@@ -31,11 +33,25 @@ function Search() {
 
         const fetchApi = async () => {
             setLoading(true);
+            setError(null); // Reset error state before each request
 
-            const result = await searchServices.search(debouncedValue);
+            try {
+                // Abort previous request
+                abortControllerRef.current.abort();
+                abortControllerRef.current = new AbortController();
 
-            setSearchResult(result);
-            setLoading(false);
+                const result = await searchServices.search(debouncedValue, {
+                    signal: abortControllerRef.current.signal, // Pass abort signal to the request
+                });
+
+                setSearchResult(result);
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setError('Có lỗi xảy ra khi tìm kiếm!');
+                }
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchApi();
@@ -59,8 +75,6 @@ function Search() {
     };
 
     return (
-        // Using a wrapper <div> tag around the reference element solves
-        // this by creating a new parentNode context.
         <div>
             <HeadlessTippy
                 interactive
@@ -69,9 +83,13 @@ function Search() {
                     <div className={cx('search-result')} tabIndex="-1" {...attrs}>
                         <PopperWrapper>
                             <h4 className={cx('search-title')}>Accounts</h4>
-                            {searchResult.map((result) => (
-                                <AccountItem key={result.id} data={result} />
-                            ))}
+                            {searchResult.length > 0 ? (
+                                searchResult.map((result) => (
+                                    <AccountItem key={result.id} data={result} />
+                                ))
+                            ) : (
+                                <p>Không tìm thấy kết quả phù hợp.</p> // Message for no results
+                            )}
                         </PopperWrapper>
                     </div>
                 )}
@@ -81,7 +99,7 @@ function Search() {
                     <input
                         ref={inputRef}
                         value={searchValue}
-                        placeholder="Tiềm kiếm khóa học"
+                        placeholder="Tìm kiếm khóa học"
                         spellCheck={false}
                         onChange={handleChange}
                         onFocus={() => setShowResult(true)}
@@ -92,7 +110,7 @@ function Search() {
                         </button>
                     )}
                     {loading && <FontAwesomeIcon className={cx('loading')} icon={faSpinner} />}
-
+                    {error && <div className={cx('error-message')}>{error}</div>} {/* Error message */}
                     <button className={cx('search-btn')} onMouseDown={(e) => e.preventDefault()}>
                         <SearchIcon />
                     </button>

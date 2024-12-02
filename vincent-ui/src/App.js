@@ -20,7 +20,7 @@ function App() {
                         }
 
                         if (!route.auth) {
-                            Auth = Fragment;
+                            Auth = ({ children }) => <>{children}</>;
                         }
 
                         return (
